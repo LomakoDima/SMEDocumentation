@@ -1,0 +1,75 @@
+---
+title: Ожидание и последовательности
+description: Как делать паузы, ждать условия и собирать действия в последовательности.
+order: 9
+---
+
+## Ожидание
+
+```sme
+story waiting_demo {
+    npc "storymodengine:guide" {
+        on interact {
+            self.say("Подожди немного…")
+            wait 2s
+            self.say("Принеси ключ.")
+            wait until player.has("minecraft:tripwire_hook", 1)
+            self.say("Отлично, идём.")
+            await self.move_to(waypoint("gate"))
+        }
+    }
+}
+```
+
+| Строка | Что делает |
+| --- | --- |
+| `wait 2s` | пауза. Можно в тиках (`wait 40`), секундах (`2s`) или минутах (`1m`) |
+| `wait until условие` | ждать, пока условие станет верным |
+| `wait event имя` | ждать события, например `wait event quest.completed` |
+| `await действие` | начать долгое действие и дождаться его конца |
+
+Без `await` долгое действие начинается, а сценарий сразу идёт дальше. `await` работает только с долгими действиями: `move_to`, `move_to_waypoint`, `break_block`.
+
+## Последовательности
+
+**Последовательность** — это именованный кусок сценария, который можно запускать много раз из разных мест.
+
+```sme
+story patrol {
+    sequence night_round {
+        let guard = npc("guard")
+        if guard {
+            repeat 2 {
+                await guard.move_to(waypoint("tower"))
+                wait 3s
+                await guard.move_to(waypoint("gate"))
+                wait 3s
+            }
+        }
+    }
+
+    on time 13000 {
+        call night_round
+    }
+}
+```
+
+- Запустить последовательность: `call имя`.
+- Последовательность можно назначить и NPC: в редакторе NPC, раздел **Взаимодействия → Запустить последовательность**.
+
+## Команды движка
+
+Любая команда движка пишется как вызов функции, со значениями и выражениями в скобках:
+
+```sme
+story commands_demo {
+    var bonus = 2
+
+    on time 6000 {
+        give("minecraft:emerald", bonus * 2)
+        vfx_play_here("sparkles", "storymodengine:sparks")
+    }
+}
+```
+
+Есть и старая запись через пробелы — `give minecraft:emerald 3`, — но в ней можно писать только готовые значения, без выражений. Полный список команд — в [Справочнике команд](/docs/latest/sme-scripting/reference).

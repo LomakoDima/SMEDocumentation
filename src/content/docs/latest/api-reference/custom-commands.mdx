@@ -1,0 +1,75 @@
+---
+title: Свои команды для сценариев
+description: Как код на Java добавляет в язык SME свои команды и свойства объектов.
+order: 1
+---
+
+Язык SME можно расширять кодом на Java: добавлять **свои команды** и **свои свойства и действия объектов**. Для этого в движке есть две аннотации — `@StoryCommand` и `@SmeMember`. Все встроенные команды движка сделаны точно так же.
+
+## Подключите движок к своему моду
+
+Движок ищет аннотации в jar-файле того мода, который его подключил. Поэтому один раз вызовите `EngineBootstrap.init` в конструкторе своего мода:
+
+```java
+@Mod("mymod")
+public class MyMod {
+    public MyMod() {
+        EngineBootstrap.init(FMLJavaModLoadingContext.get().getModEventBus());
+    }
+}
+```
+
+`EngineBootstrap` лежит в пакете `com.dimalab.storymodengine.common.core`. После этого движок найдёт в вашем моде `@StoryCommand`, `@SmeMember` и остальные свои аннотации.
+
+## Своя команда
+
+Пометьте метод аннотацией `@StoryCommand` с именем команды:
+
+```java
+@StoryCommand("heal")
+public static void heal(ServerPlayer player, int amount) {
+    player.heal(amount);
+}
+```
+
+Правила:
+
+- метод `public static` и ничего не возвращает (`void`);
+- первый параметр — `ServerPlayer`, игрок, для которого выполняется сценарий;
+- остальные параметры становятся аргументами команды. Можно только `String`, `int`, `long`, `float`, `double` и `boolean`.
+
+В сценарии команда пишется как вызов функции: `heal(4)`.
+
+## Своё свойство или действие объекта
+
+Аннотация `@SmeMember` добавляет свойство или действие к объекту — например, к `player`:
+
+```java
+@SmeMember(on = "player", value = "mana", property = true, doc = "запас маны")
+public static long mana(FlowContext fc, ServerPlayer self) {
+    return Mana.of(self);
+}
+```
+
+Что значат поля:
+
+- `on` — к какому объекту добавить: `player`, `npc`, `entity`, `item`, `pos`, `world`. Если оставить пустым, получится общая функция без объекта.
+- `value` — имя.
+- `property = true` — свойство, читается без скобок: `player.mana`. Без него — действие со скобками.
+- `doc` — короткое описание. Его показывают подсказки [редактора кода](/docs/latest/sme-scripting/ide).
+
+Правила:
+
+- метод `public static`;
+- первый параметр — всегда `FlowContext`;
+- если указан `on`, второй параметр — сам объект (`self`);
+- у свойства других параметров нет, у действия они становятся аргументами.
+
+## Если что-то не подхватилось
+
+Метод, который не подходит под правила, движок пропускает и пишет причину в журнал игры — строку `Skipping @StoryCommand …` или `Skipping @SmeMember …`. А сколько команд и свойств найдено, видно по строкам `@StoryCommand discovered …` и `@SmeMember discovered …`.
+
+## Kotlin
+
+> [!NOTE]
+> Подключайтесь к движку через его **Java-API**. Kotlin внутри jar-файла движка спрятан и переименован, поэтому типы Kotlin в коде движка не совпадут с типами Kotlin вашего мода.

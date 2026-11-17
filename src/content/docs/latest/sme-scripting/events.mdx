@@ -1,0 +1,96 @@
+---
+title: События истории
+description: Как запустить что-то, когда игрок заходит в зону, наступает время или происходит событие.
+order: 5
+---
+
+**События истории** — это реакции на то, что происходит в мире, а не с конкретным NPC или предметом.
+
+```sme
+story world_events {
+    on player enters "village_gate" once {
+        start dialogue guard_intro
+    }
+
+    on time 13000 {
+        player.message("Наступает ночь.")
+    }
+
+    on quest.completed when quest_done("village_trial") {
+        player.message("Деревня благодарит тебя.")
+    }
+
+    dialogue guard_intro {
+        Guard: "Стой! Кто идёт?"
+        end
+    }
+}
+```
+
+## Виды событий
+
+| Событие | Когда срабатывает |
+| --- | --- |
+| `on player enters "зона"` | игрок зашёл в зону с этим именем |
+| `on time N` | время суток в мире дошло до N (0 — утро, 6000 — полдень, 13000 — вечер, 18000 — полночь) |
+| `on player.join` | игрок зашёл на сервер |
+| `on player.leave` | игрок вышел |
+| `on entity.kill` | игрок кого-то убил |
+| `on quest.completed` | игрок завершил квест |
+
+**Зона** — это актёр **Зона**, поставленный через [Place Actors](/docs/latest/editors/placing). Имя зоны задаётся в панели **Детали** или переименованием в панели **Сцена**. Если зоны с таким именем ещё нет, редактор кода предупредит об этом.
+
+## Один раз или всегда
+
+По умолчанию событие срабатывает **каждый раз**. Слова после события это меняют:
+
+- `once` — только один раз для каждого игрока;
+- `persistent` — движок запомнит, что событие уже было, даже после перезапуска игры.
+
+```sme
+story crypt {
+    on player enters "old_crypt" once persistent {
+        player.play_sound("minecraft:ambient.cave")
+        wait 2s
+        player.message("Здесь давно никого не было…")
+    }
+}
+```
+
+## Условие
+
+`when` после события добавляет проверку: событие сработает, только если условие верно.
+
+```sme
+story night_guard {
+    var player.warned = false
+
+    on player enters "village_gate" when world.time > 13000 and not player.warned {
+        player.warned = true
+        player.message("Ворота закрыты на ночь.")
+    }
+}
+```
+
+## Триггер с именем
+
+Если событию нужен свой идентификатор, есть полная форма `trigger`:
+
+```sme
+story village_entry_demo {
+    trigger village_entry {
+        when player enters "village_gate"
+        once
+        run { start dialogue guard_intro }
+    }
+
+    dialogue guard_intro {
+        Guard: "Добро пожаловать."
+        end
+    }
+}
+```
+
+## Триггер без кода
+
+Простую реакцию можно сделать и без сценария: поставьте актёра **Триггер** через Place Actors. В его панели **Детали** есть поле **Действие (.sme)** — одна строка сценария, которая выполнится, когда игрок зайдёт в область, — а также **Один раз на игрока** и **Перезарядка**.

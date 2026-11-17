@@ -1,0 +1,16 @@
+StoryModEngine — сайт и документация
+
+Нужны Node.js 24.x и npm.
+
+Установка и разработка:
+  npm ci
+  npm run dev
+
+Сборка для Vercel:
+  npm run build
+
+Локальный просмотр production-сборки:
+  npm run preview
+
+Инструкции по импорту репозитория в Vercel находятся в README.md.
+Ключи API и обязательные переменные окружения не нужны.

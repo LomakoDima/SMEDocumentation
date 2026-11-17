@@ -1,0 +1,296 @@
+---
+title: Справочник команд
+description: Все функции, свойства объектов и команды сценариев, которые есть в движке.
+order: 11
+---
+
+Этот список собран из самого движка — это ровно то, что понимает язык SME в текущей версии движка. Те же подсказки показывает [редактор кода](/docs/latest/sme-scripting/ide), когда вы ставите точку после имени объекта.
+
+Как читать таблицы:
+
+- **Свойство** пишется без скобок: `player.name`. Стрелка `→` показывает, что оно возвращает: число (`number`), текст (`text`), да/нет (`bool`) и т. д.
+- **Действие** пишется со скобками и параметрами: `player.give("minecraft:bread", 3)`.
+- Пометка **можно ждать через `await`** — долгое действие, которого можно дождаться.
+- Описания есть не у всех строк: там, где его нет, смысл понятен из названия.
+
+## Функции
+
+Пишутся сами по себе, без объекта: `random(1, 6)`.
+
+
+| Что | Описание |
+| --- | --- |
+| `abs(value) → number` |  |
+| `chance(percent) → bool` | true с вероятностью percent из 100 |
+| `distance(a, b) → number` | расстояние между двумя сущностями или точками |
+| `floor(value) → number` |  |
+| `max(a, b) → number` |  |
+| `min(a, b) → number` |  |
+| `nearest(type, radius) → entity` | ближайшая к игроку сущность типа в радиусе |
+| `npc(name) → npc` | NPC по имени в скриптах |
+| `pos(x, y, z) → pos` | точка x y z |
+| `quest_active(quest) → bool` | квест сейчас выполняется |
+| `quest_done(quest) → bool` | квест завершён |
+| `random(min, max) → number` | целое от min до max включительно |
+| `round(value) → number` |  |
+| `waypoint(name) → pos` | позиция путевой точки |
+
+
+## player
+
+Игрок, для которого выполняется сценарий. Кроме этих строк, у игрока есть всё из раздела [entity](#entity).
+
+
+| Что | Описание |
+| --- | --- |
+| `add_xp(amount)` | добавить очки опыта |
+| `count(item) → number` | сколько таких предметов в инвентаре |
+| `give(item, count)` | выдать предметы |
+| `has(item, count) → bool` | есть ли в инвентаре не меньше count предметов |
+| `level → number` | уровень опыта |
+| `message(text)` | сообщение в чат этому игроку |
+| `name → text` | ник игрока |
+| `play_sound(sound)` | проиграть звук у игрока |
+| `sneaking → bool` | игрок крадётся |
+| `take(item, count) → bool` | забрать предметы; true, если хватило |
+
+
+## npc
+
+NPC — `self` в событиях NPC или любой NPC через `npc("имя")`. Кроме этих строк, у NPC есть всё из раздела [entity](#entity).
+
+
+| Что | Описание |
+| --- | --- |
+| `attack(target)` | напасть на сущность |
+| `break_block(x, y, z, requireCorrectTool)` | можно ждать через `await` |
+| `calm()` | прекратить атаку |
+| `clear_combat_weapon()` |  |
+| `clear_inventory()` |  |
+| `clear_target()` |  |
+| `collect_items(itemId, radius)` |  |
+| `despawn()` |  |
+| `destroy_block(x, y, z)` |  |
+| `drop_item(itemId, count)` |  |
+| `follow_player()` |  |
+| `give_item(itemId, count)` |  |
+| `give_main_hand(itemId, count)` |  |
+| `give_off_hand(itemId, count)` |  |
+| `look_at_player()` |  |
+| `look_at_pos(x, y, z)` |  |
+| `move_to(x, y, z)` | можно ждать через `await` |
+| `move_to_waypoint(waypoint)` | можно ждать через `await` |
+| `place_block(x, y, z, facing)` |  |
+| `play_freeze(clip)` |  |
+| `play_looped(clip)` |  |
+| `play_once(clip)` |  |
+| `restock()` |  |
+| `say(text)` | реплика NPC в чат игроку |
+| `set_attribute(attributeId, value)` |  |
+| `set_combat_weapon(itemId, restorePrevious)` |  |
+| `set_name(displayName)` |  |
+| `set_pickup(enabled)` |  |
+| `set_target(targetPlayerName)` |  |
+| `spawn()` |  |
+| `spawn_as(instanceName)` |  |
+| `stop_animation()` |  |
+| `stop_collect()` |  |
+| `stop_look()` |  |
+| `stop_move()` |  |
+| `take_item(itemId, count)` |  |
+| `teleport(x, y, z)` |  |
+| `teleport_dimension(dimensionId, x, y, z)` |  |
+| `teleport_rotated(x, y, z, yaw, pitch)` |  |
+| `template → text` | id шаблона |
+| `use_block(x, y, z)` |  |
+
+
+## entity
+
+Общее для всех существ: игрока, NPC, `attacker` в событиях NPC, `target` в событиях предмета и результата `nearest(...)`.
+
+
+| Что | Описание |
+| --- | --- |
+| `alive → bool` | жив ли |
+| `damage(amount)` | нанести урон от имени игрока |
+| `distance_to(other) → number` | расстояние до сущности или точки |
+| `effect(effect, seconds, level)` | наложить эффект: id, секунды, уровень |
+| `follow_player(targetPlayerName)` |  |
+| `get_data_int(target, key)` |  |
+| `get_data_string(target, key)` |  |
+| `get_or_set_data_string(target, key, defaultValue)` |  |
+| `heal(amount)` | восстановить здоровье |
+| `health → number` | текущее здоровье |
+| `ignite(seconds)` | поджечь на seconds секунд |
+| `is_player → bool` | это игрок |
+| `knockback(strength)` | отбросить от игрока |
+| `look_at_nearest(range)` |  |
+| `max_health → number` | максимум здоровья |
+| `name → text` | отображаемое имя |
+| `pos → pos` | позиция |
+| `reset_material(materialName)` |  |
+| `reset_materials()` |  |
+| `set_data_int(key, value, syncMode)` |  |
+| `set_data_string(key, value, syncMode)` |  |
+| `set_material_skin(materialName, playerNameOrUuid)` |  |
+| `set_material_texture(materialName, texturePath)` |  |
+| `stop_follow()` |  |
+| `stop_look_at()` |  |
+| `teleport(pos)` | переместить в точку |
+| `type → text` | id типа сущности |
+
+
+## item
+
+Предмет в событиях предмета.
+
+
+| Что | Описание |
+| --- | --- |
+| `consume(count)` | израсходовать count штук |
+| `cooldown(ticks)` | перезарядка в тиках (20 = 1 с) |
+| `count → number` | размер стопки |
+| `damage(amount)` | потратить прочность |
+| `id → text` | id предмета |
+
+
+## pos
+
+Точка в мире — результат `pos(x, y, z)`, `waypoint("имя")` или свойство `pos` у существа.
+
+
+| Что | Описание |
+| --- | --- |
+| `offset(dx, dy, dz) → pos` | точка со смещением |
+| `x → number` |  |
+| `y → number` |  |
+| `z → number` |  |
+
+
+## world
+
+Мир, в котором идёт история.
+
+
+| Что | Описание |
+| --- | --- |
+| `day → number` | номер игрового дня |
+| `is_day → bool` |  |
+| `raining → bool` |  |
+| `time → number` | время суток 0..23999 |
+
+
+## Команды
+
+Команды пишутся как вызов функции: `play_sound("minecraft:block.note_block.bell")`. Команды с приставкой `npc_` доступны и как действия NPC: `npc_move_to("guard", 1, 64, 1)` — это то же самое, что `npc("guard").move_to(pos(1, 64, 1))`. Команды с приставкой `entity_` — так же для любых существ.
+
+| Команда | Параметры |
+| --- | --- |
+
+| `actor_video_pause` | `actor` |
+| `actor_video_play` | `actor` |
+| `actor_video_seek` | `actor, seconds` |
+| `actor_video_stop` | `actor` |
+| `await_entity` | `targetVar, timeoutTicks` |
+| `camera_view` | `camera, seconds` |
+| `consume_item` | `count` |
+| `container_clear` | `name` |
+| `container_give` | `name, itemId, count` |
+| `damage_item` | `amount` |
+| `damage_target` | `amount` |
+| `effect_self` | `effectId, seconds, level` |
+| `effect_target` | `effectId, seconds, level` |
+| `entity_follow_player` | `target, targetPlayerName` |
+| `entity_get_data_int` | `resultVar, target, key` |
+| `entity_get_data_string` | `resultVar, target, key` |
+| `entity_get_or_set_data_string` | `resultVar, target, key, defaultValue` |
+| `entity_look_at_nearest` | `target, range` |
+| `entity_reset_material` | `target, materialName` |
+| `entity_reset_materials` | `target` |
+| `entity_set_data_int` | `target, key, value, syncMode` |
+| `entity_set_data_string` | `target, key, value, syncMode` |
+| `entity_set_material_skin` | `target, materialName, playerNameOrUuid` |
+| `entity_set_material_texture` | `target, materialName, texturePath` |
+| `entity_stop_follow` | `target` |
+| `entity_stop_look_at` | `target` |
+| `find_nearest_entity` | `resultVar, entityTypeId, radius` |
+| `give` | `itemId, count` |
+| `heal_self` | `amount` |
+| `hide_hud` | `hudId` |
+| `hud_countdown` | `id, seconds, title` |
+| `hud_stopwatch` | `id, title` |
+| `hud_timer_stop` | `id` |
+| `ignite_target` | `seconds` |
+| `item_cooldown` | `ticks` |
+| `knockback_target` | `strength` |
+| `npc_break_block` | `name, x, y, z, requireCorrectTool` |
+| `npc_clear_combat_weapon` | `name` |
+| `npc_clear_inventory` | `npcName` |
+| `npc_clear_target` | `name` |
+| `npc_collect_items` | `name, itemId, radius` |
+| `npc_despawn` | `name` |
+| `npc_destroy_block` | `name, x, y, z` |
+| `npc_drop_item` | `name, itemId, count` |
+| `npc_follow_player` | `name` |
+| `npc_give_item` | `npcName, itemId, count` |
+| `npc_give_main_hand` | `name, itemId, count` |
+| `npc_give_off_hand` | `name, itemId, count` |
+| `npc_look_at_player` | `name` |
+| `npc_look_at_pos` | `name, x, y, z` |
+| `npc_move_to` | `name, x, y, z` |
+| `npc_move_to_waypoint` | `npc, waypoint` |
+| `npc_place_block` | `name, x, y, z, facing` |
+| `npc_play_freeze` | `name, clip` |
+| `npc_play_looped` | `name, clip` |
+| `npc_play_once` | `name, clip` |
+| `npc_restock` | `npcName` |
+| `npc_set_attribute` | `name, attributeId, value` |
+| `npc_set_combat_weapon` | `name, itemId, restorePrevious` |
+| `npc_set_name` | `name, displayName` |
+| `npc_set_pickup` | `name, enabled` |
+| `npc_set_target` | `name, targetPlayerName` |
+| `npc_spawn` | `name` |
+| `npc_spawn_as` | `templateName, instanceName` |
+| `npc_stop_animation` | `name` |
+| `npc_stop_collect` | `name` |
+| `npc_stop_look` | `name` |
+| `npc_stop_move` | `name` |
+| `npc_take_item` | `npcName, itemId, count` |
+| `npc_teleport` | `name, x, y, z` |
+| `npc_teleport_dimension` | `name, dimensionId, x, y, z` |
+| `npc_teleport_rotated` | `name, x, y, z, yaw, pitch` |
+| `npc_use_block` | `name, x, y, z` |
+| `open_container` | `name` |
+| `open_npc_inventory` | `npcName` |
+| `open_shop` | `shopId` |
+| `open_trade` | `npcName, tradeName` |
+| `open_ui` | `screenId` |
+| `play_sound` | `soundId` |
+| `set_block` | `blockId, x, y, z` |
+| `show_hud` | `hudId` |
+| `spawn` | `entityTypeId` |
+| `teleport` | `zoneName` |
+| `teleport_to_waypoint` | `waypoint` |
+| `vfx_beam` | `name, effect, from, to` |
+| `vfx_beam_bones` | `name, effect, from, fromBone, to, toBone` |
+| `vfx_beam_to` | `name, effect, from, x, y, z` |
+| `vfx_color` | `name, param, color` |
+| `vfx_enable` | `name, enabled` |
+| `vfx_param` | `name, param, value` |
+| `vfx_play` | `name, effect, x, y, z` |
+| `vfx_play_here` | `name, effect` |
+| `vfx_play_on` | `name, effect, target` |
+| `vfx_play_on_bone` | `name, effect, target, bone` |
+| `vfx_start` | `name` |
+| `vfx_stop` | `name` |
+| `vfx_trigger` | `name` |
+| `vfx_wind` | `angle, strength` |
+| `vfx_wind_calm` | — |
+| `vfx_wind_gust` | `gust` |
+| `wait_persistent` | `name, ticks` |
+| `world_preset` | `name` |
+| `world_time_speed` | `speed` |
+
+
+Кроме команд, в сценарии есть встроенные слова: `start dialogue`, `start quest`, `play cinematic`, `call`, `wait`, `await`, `jump`, `end` — они описаны на страницах [Диалоги](/docs/latest/sme-scripting/dialogues), [Квесты](/docs/latest/sme-scripting/quests) и [Ожидание и последовательности](/docs/latest/sme-scripting/waiting).

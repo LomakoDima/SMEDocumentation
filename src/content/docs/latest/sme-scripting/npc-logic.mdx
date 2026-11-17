@@ -1,0 +1,107 @@
+---
+title: Логика NPC
+description: Как задать, что делает персонаж, когда игрок с ним взаимодействует.
+order: 3
+---
+
+Внешность и поведение NPC настраиваются в [редакторе NPC](/docs/latest/editors/npc-editor). Сценарий добавляет **реакции**: что NPC делает, когда на него нажали, ударили, когда он погиб или когда игрок подошёл.
+
+```sme
+story village {
+    npc "storymodengine:guard" {
+        on interact {
+            if player.has("emerald", 5) {
+                player.take("emerald", 5)
+                self.say("Проходи, {player.name}.")
+            } else {
+                self.say("Принеси пять изумрудов.")
+            }
+        }
+        on shift_interact { self.look_at_player() }
+        on hit            { self.attack(attacker) }
+        on death          { player.message("Стражник пал.") }
+        on near 6         { self.say("Стой! Кто идёт?") }
+    }
+}
+```
+
+В кавычках после `npc` — идентификатор шаблона NPC (так же, как он называется в проекте).
+
+## События
+
+| Событие | Когда срабатывает |
+| --- | --- |
+| `on interact` | игрок нажал на NPC правой кнопкой |
+| `on shift_interact` | то же, но с зажатым Shift |
+| `on hit` | NPC ударили |
+| `on death` | NPC погиб |
+| `on near N` | игрок подошёл ближе чем на N блоков (каждый раз, когда подходит) |
+
+Подробности:
+
+- `on interact` срабатывает, если в редакторе NPC в разделе **Взаимодействия** выбрано **Нет быстрого действия**. Если там выбран диалог, магазин или другое быстрое действие, оно важнее.
+- `on death` выполняется для игрока, который убил NPC. Если NPC погиб по другой причине — для всех игроков в радиусе 64 блоков.
+- К любому событию можно добавить условие: `on interact when player.sneaking { … }`.
+
+## Кто есть кто
+
+| Имя | Кто это | Где доступно |
+| --- | --- | --- |
+| `player` | игрок, для которого выполняется сценарий | везде |
+| `self` | этот NPC | в событиях NPC |
+| `attacker` | тот, кто ударил или убил NPC | `on hit`, `on death` |
+
+Свойства читаются без скобок (`player.name`, `self.health`), а действия вызываются со скобками (`self.say("…")`). В редакторе кода после точки появляется список всего, что умеет объект.
+
+## Что может NPC
+
+Самое нужное:
+
+| Действие | Что делает |
+| --- | --- |
+| `self.say(text)` | реплика NPC в чат игроку |
+| `self.look_at_player()` | повернуться к игроку |
+| `self.move_to(точка)` | пойти к точке (можно ждать через `await`) |
+| `self.move_to_waypoint(name)` | пойти к точке пути (можно ждать через `await`) |
+| `self.attack(target)`, `self.calm()` | напасть на цель, прекратить атаку |
+| `self.follow_player()`, `self.stop_follow()` | идти за игроком, перестать |
+| `self.give_item(item, count)` | дать NPC предмет |
+| `self.play_once(clip)`, `self.play_looped(clip)` | проиграть анимацию один раз или по кругу |
+| `self.teleport(x, y, z)` | телепортировать NPC |
+
+Полный список — в [Справочнике команд](/docs/latest/sme-scripting/reference#npc).
+
+## Ждать, пока NPC дойдёт
+
+Обычно действие начинается, и сценарий сразу идёт дальше. Чтобы дождаться, пока NPC дойдёт, поставьте перед действием `await`:
+
+```sme
+story escort {
+    npc "storymodengine:guide" {
+        on interact {
+            self.say("Иди за мной.")
+            await self.move_to(waypoint("gate"))
+            self.say("Пришли.")
+        }
+    }
+}
+```
+
+`await` работает только с долгими действиями: `move_to`, `move_to_waypoint`, `break_block`. Редактор кода помечает такие действия.
+
+## Другой NPC
+
+К любому NPC по имени можно обратиться через `npc("имя")`:
+
+```sme
+story patrol {
+    sequence night_round {
+        let guard = npc("guard")
+        if guard {
+            await guard.move_to(waypoint("tower"))
+            wait 3s
+            await guard.move_to(waypoint("gate"))
+        }
+    }
+}
+```

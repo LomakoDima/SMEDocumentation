@@ -1,0 +1,92 @@
+---
+title: Квесты
+description: Как сделать задание с целями и наградой.
+order: 7
+---
+
+Квест — это задание для игрока: что нужно сделать и что он за это получит.
+
+```sme
+story village_quests {
+    quest village_trial {
+        title "Испытание стража"
+        description "Докажи, что достоин."
+
+        objective kill zombie 3
+        objective collect emerald 5
+
+        reward {
+            item emerald 3
+            xp 100
+            unlock_quest next_chapter
+        }
+    }
+
+    quest next_chapter {
+        title "Следующая глава"
+        description "Поговори со старостой."
+        prerequisite village_trial
+        objective talk_to villager
+    }
+}
+```
+
+<Screenshot id="sme/quest-hud" alt="Квест на экране игрока">
+Квест на экране игрока: название «Ночная стража» и цель с прогрессом 0/3.
+</Screenshot>
+
+## Свойства квеста
+
+| Строка | Что делает |
+| --- | --- |
+| `title "…"` | название квеста |
+| `description "…"` | описание |
+| `prerequisite id` | квест, который нужно завершить раньше |
+| `objective …` | цель (их может быть несколько) |
+| `reward { … }` | награда |
+
+## Цели
+
+| Цель | Что нужно сделать |
+| --- | --- |
+| `objective kill <существо> N` | убить N существ этого типа |
+| `objective collect <предмет> N` | собрать N предметов |
+| `objective talk_to <существо>` | поговорить (нажать правой кнопкой) с существом этого типа |
+| `objective interact <блок>` | нажать на блок этого типа |
+| `objective dialogue <диалог>` | пройти диалог |
+| `objective quest <квест>` | завершить другой квест |
+| `objective find_entity <существо> R` | найти существо этого типа в радиусе R блоков |
+
+## Награды
+
+| Награда | Что даёт |
+| --- | --- |
+| `item <предмет> N` | N предметов |
+| `xp N` | N очков опыта |
+| `unlock_quest <квест>` | открыть следующий квест |
+| `command "…"` | выполнить команду Minecraft от имени игрока |
+
+## Как начать квест
+
+- Из сценария: `start quest village_trial`.
+- В ответе диалога, по клику на NPC, при входе в зону — где угодно, где пишутся действия.
+
+```sme
+story quest_start_demo {
+    npc "storymodengine:guard" {
+        on interact {
+            if not quest_active("village_trial") and not quest_done("village_trial") {
+                start quest village_trial
+            }
+        }
+    }
+
+    quest village_trial {
+        title "Испытание стража"
+        description "Убей трёх зомби у ворот."
+        objective kill zombie 3
+    }
+}
+```
+
+Проверить, идёт ли квест или завершён ли он, можно функциями `quest_active("id")` и `quest_done("id")`. Чтобы что-то произошло после завершения, используйте событие `on quest.completed` — см. [События истории](/docs/latest/sme-scripting/events).

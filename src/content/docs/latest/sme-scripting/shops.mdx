@@ -1,0 +1,63 @@
+---
+title: Магазины, хранилища и обмен
+description: Как сделать магазин за валюту, общий или личный сундук и обмен как у жителей.
+order: 8
+---
+
+## Магазин
+
+Магазин продаёт предметы за **валюту** — любой предмет, например изумруды.
+
+```sme
+story market {
+    shop "bakery" {
+        currency "minecraft:emerald"
+        item "minecraft:bread" price 2 count 3
+        item "minecraft:cake" price 5 category "Сладкое"
+    }
+}
+```
+
+- `currency` — чем платят.
+- `item "предмет" price N` — товар и его цена. По желанию: `count N` — сколько штук за эту цену, `category "…"` — раздел магазина.
+
+Открыть магазин: в редакторе NPC выберите **Взаимодействия → Открыть магазин**, или из сценария — `open_shop("bakery")`.
+
+## Хранилище
+
+Хранилище — это сундук без сундука: окно с ячейками, которое открывается из сценария.
+
+```sme
+story storage {
+    container "guild_chest" {
+        title "Сундук гильдии"
+        rows 3
+        shared
+    }
+}
+```
+
+- `title "…"` — заголовок окна.
+- `rows N` — сколько рядов ячеек, от 1 до 6.
+- `shared` — одно хранилище на всех; `per_player` — у каждого игрока своё.
+
+Открыть: `open_container("guild_chest")`. Положить предмет: `container_give("guild_chest", "minecraft:diamond", 1)`. Очистить: `container_clear("guild_chest")`.
+
+## Обмен
+
+Обмен работает как у жителей Minecraft: игрок отдаёт одни предметы и получает другие.
+
+```sme
+story smith_trade {
+    trade "smith_offers" {
+        offer "minecraft:iron_ingot" 3 gives "minecraft:iron_sword"
+        offer "minecraft:emerald" 2 and "minecraft:stick" 1 gives "minecraft:arrow" count 8 uses 5
+    }
+}
+```
+
+- `offer "предмет" N gives "результат"` — отдать N предметов и получить результат.
+- `and "второй предмет" N` — второй предмет в цене.
+- `count N` — сколько штук результата, `uses N` — сколько раз можно обменять.
+
+Открыть обмен: в редакторе NPC выберите **Взаимодействия → Открыть обмен**, или из сценария — `open_trade("имя NPC", "smith_offers")`.

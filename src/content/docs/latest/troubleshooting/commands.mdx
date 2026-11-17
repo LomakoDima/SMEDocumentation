@@ -1,0 +1,77 @@
+---
+title: Команды /sme
+description: Команды движка в чате — для проверки и управления без редактора.
+order: 2
+---
+
+Почти всё в движке делается через редактор и сценарии, но у многих функций есть и команды в чате. Они удобны для быстрой проверки.
+
+> [!NOTE]
+> Команды `/sme …` на сервере доступны только **операторам** (уровень прав 2). В одиночной игре включите читы при создании мира.
+
+## Истории
+
+| Команда | Что делает |
+| --- | --- |
+| `/sme quest list` | список квестов |
+| `/sme quest start <id>`, `stop <id>`, `progress <id>` | начать, остановить квест, показать прогресс |
+| `/sme trigger list`, `info <id>` | список событий истории и сведения о нём |
+| `/sme trigger fire <id>` | запустить событие вручную |
+| `/sme dialogue start <id>`, `stop` | начать или закрыть диалог |
+| `/sme shop open <name>` | открыть магазин |
+| `/sme container open <name>`, `npc`, `trade <name>` | открыть хранилище, инвентарь NPC, обмен |
+| `/sme ui open <screenId>` | открыть экран |
+| `/sme ui hud show <hudId>`, `hide <hudId>` | показать или скрыть элемент HUD |
+| `/sme ui timer countdown <seconds>`, `stopwatch`, `clear` | таймер на экране |
+
+## Катсцены и видео
+
+| Команда | Что делает |
+| --- | --- |
+| `/sme cutscene id <cutscene> here` | проиграть катсцену здесь (есть варианты `follow`, `at`, `near`) |
+| `/sme cutscene pause`, `resume`, `skip` | пауза, продолжить, пропустить |
+| `/sme cutscene seek <ticks>`, `jumpto <marker>`, `speed <multiplier>` | перемотать, перейти к маркеру, скорость |
+| `/sme video play <source>`, `stop`, `pause` | показать видео поверх экрана |
+| `/sme video seek <seconds>`, `speed <value>`, `loop` | перемотка, скорость, повтор |
+| `/sme video info <source>`, `stats` | сведения о файле и о декодере |
+
+## Мир и объекты
+
+| Команда | Что делает |
+| --- | --- |
+| `/sme editor` | открыть редактор (то же, что <Kbd>F7</Kbd>) |
+| `/sme prop spawn <name>`, `info <name>`, `clear` | поставить модель-проп, сведения о модели, убрать пропы в радиусе 32 блоков |
+| `/sme npc spawn …`, `spawnas <template> <instanceName>` | поставить NPC |
+| `/sme vfx play <effect> …`, `on <target> <effect> …` | запустить эффект |
+| `/sme entity follow`, `stopfollow`, `lookat`, `stoplookat` | заставить существо идти за игроком или смотреть на него |
+| `/sme model attach <targets> <model>`, `clear <targets>` | надеть модель на любое существо |
+| `/sme material set`, `setskin`, `reset`, `resetall` | поменять текстуру материала модели |
+
+## Записи
+
+| Команда | Что делает |
+| --- | --- |
+| `/sme replay record start <radius>`, `stop <name>`, `cancel` | начать, сохранить, отменить запись |
+| `/sme replay list`, `play <take>`, `loop <take>`, `pause`, `seek` | список записей и просмотр |
+
+## Игрок и графика
+
+| Команда | Что делает |
+| --- | --- |
+| `/sme playermodel firstperson`, `locomotion`, `rotation`, `footik` | настройки модели игрока (то же, что в настройках движка) |
+| `/sme postfx on`, `off`, `hud show`, `hide` | эффекты экрана |
+| `/sme gpu compute auto`, `on`, `off` | использовать ли видеокарту для вычислений |
+
+## Скрытые команды для разработки
+
+В движке есть тестовые и демонстрационные команды (`/sme eventtest`, `/sme script test`, `/sme async stresstest` и другие). В обычной сборке они **скрыты**. Чтобы их включить:
+
+1. Создайте файл `config/storymodengine/dev.json` в папке игры:
+
+```json
+{"devCommands": true}
+```
+
+2. Перезапустите игру.
+
+Другой способ — запустить игру с параметром JVM `-Dstorymodengine.devCommands=true`. Чтобы снова скрыть команды, удалите файл и перезапустите игру.
