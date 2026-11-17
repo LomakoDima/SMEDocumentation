@@ -1372,6 +1372,44 @@ h3 {
 .release-notes {
   margin-top: 16px;
 }
+.release-version {
+  white-space: nowrap;
+}
+.action-button.is-secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--foreground);
+  box-shadow: none;
+}
+.action-button.is-secondary:hover {
+  background: #ffffff0d;
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: none;
+}
+.release-checksum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.release-checksum span {
+  font-weight: 600;
+}
+.release-checksum code {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.release-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  margin-top: 16px;
+}
 .release-refresh-note {
   margin-top: 14px;
   font-size: 14px;

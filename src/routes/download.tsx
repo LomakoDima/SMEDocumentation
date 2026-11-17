@@ -1,15 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowRight,
-  BookOpen,
-  Download,
-  ExternalLink,
-  Github,
-  LoaderCircle,
-  RefreshCw,
-} from "lucide-react";
+import { ArrowRight, BookOpen, Download, ExternalLink, Github } from "lucide-react";
 import { SITE } from "@/lib/site";
+import { SITE_BUILD } from "@/lib/site-build";
 import {
   fetchReleases,
   fileSize,
@@ -51,15 +44,12 @@ function DownloadPage() {
   const latest = getLatestRelease(releases);
   const previous = releases.filter((release) => release.id !== latest?.id);
   const asset = latest ? getDownloadAsset(latest) : undefined;
-  const status = query.isPending
-    ? "Проверяем GitHub"
-    : latest
-      ? latest.prerelease
-        ? "Ранний доступ"
-        : "Стабильная версия"
-      : query.isError
-        ? "Недоступно"
-        : "Скоро";
+  const newerOnGithub = latest && latest.tag_name !== SITE_BUILD.tag ? latest : undefined;
+  const prerelease = newerOnGithub ? newerOnGithub.prerelease : SITE_BUILD.prerelease;
+  const githubDownload = newerOnGithub
+    ? (asset?.browser_download_url ?? newerOnGithub.html_url)
+    : SITE_BUILD.githubDownloadUrl;
+  const releaseUrl = newerOnGithub ? newerOnGithub.html_url : SITE_BUILD.releaseUrl;
 
   return (
     <div className="download-page site-width">
@@ -79,72 +69,67 @@ function DownloadPage() {
       </section>
 
       <div className="download-layout">
-        <section
-          aria-labelledby="release-heading"
-          aria-busy={query.isPending}
-          className="release-panel"
-        >
+        <section aria-labelledby="release-heading" className="release-panel">
           <div className="release-kicker">
             <p className="release-label">Последняя официальная сборка</p>
-            <span
-              className="release-status metadata"
-              data-state={
-                latest
-                  ? latest.prerelease
-                    ? "preview"
-                    : "stable"
-                  : query.isError
-                    ? "error"
-                    : "pending"
-              }
-            >
+            <span className="release-status metadata" data-state={prerelease ? "preview" : "stable"}>
               <span aria-hidden="true" />
-              {status}
+              {prerelease ? "Ранний доступ" : "Стабильная версия"}
             </span>
           </div>
           <div aria-live="polite" aria-atomic="true" className="release-message">
             <h2 id="release-heading" className="display-heading">
-              {query.isPending
-                ? "Ищем последнюю сборку."
-                : latest
-                  ? latest.name || latest.tag_name
-                  : query.isError
-                    ? "Не удалось проверить версии."
-                    : "Публичных версий пока нет"}
+              {newerOnGithub ? (
+                newerOnGithub.name || newerOnGithub.tag_name
+              ) : (
+                <>
+                  StoryModEngine <span className="release-version">{SITE_BUILD.version}</span>{" "}
+                  <span className="release-version">({SITE_BUILD.channel})</span>
+                </>
+              )}
             </h2>
             <p>
-              {query.isPending
-                ? "Проверяем официальный репозиторий на GitHub: ищем опубликованные версии и файлы для скачивания."
-                : latest
-                  ? "Скачай официальную сборку. Перед установкой проверь в описании версии совместимость с Minecraft, загрузчик и зависимости."
-                  : query.isError
-                    ? "Не удалось связаться с GitHub. Попробуй ещё раз или открой страницу официальных версий."
-                    : query.data?.repositoryUnavailable
-                      ? "Официальный репозиторий пока недоступен публично. Файлы появятся здесь после публикации первой версии."
-                      : "Публичных версий пока нет. Первая официальная сборка появится здесь, когда будет готова."}
+              {newerOnGithub
+                ? `На GitHub уже вышла версия ${newerOnGithub.tag_name}. Скачай её с GitHub — с сайта пока доступна ${SITE_BUILD.tag}.`
+                : "Скачай jar-файл прямо с сайта или с GitHub — это один и тот же файл, его контрольная сумма указана ниже. Ранний доступ: возможности и форматы файлов ещё могут меняться между версиями."}
             </p>
           </div>
           <div className="release-actions cta-row">
-            {latest ? (
-              <a href={asset?.browser_download_url ?? latest.html_url} className="action-button">
-                <Download size={17} aria-hidden="true" />
-                {asset ? "Скачать StoryModEngine" : "Файлы версии"}
-              </a>
-            ) : query.isError ? (
-              <button onClick={() => void query.refetch()} className="action-button">
-                <RefreshCw size={17} aria-hidden="true" />
-                Попробовать снова
-              </button>
-            ) : (
-              <button disabled className="action-button">
-                {query.isPending ? (
-                  <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <Download size={17} aria-hidden="true" />
-                )}
-                {query.isPending ? "Проверяем версии…" : "Скачивание скоро появится"}
-              </button>
-            )}
+            <a href={SITE_BUILD.href} download={SITE_BUILD.file} className="action-button">
+              <Download size={17} aria-hidden="true" />
+              {newerOnGithub ? `Скачать ${SITE_BUILD.tag} с сайта` : "Скачать с сайта"}
+            </a>
+            <a href={githubDownload} className="action-button is-secondary">
+              <Github size={17} aria-hidden="true" />
+              Скачать с GitHub
+            </a>
+          </div>
+          <p className="release-filename">
+            {SITE_BUILD.file} · {fileSize(SITE_BUILD.size)}
+          </p>
+          <p className="release-checksum">
+            <span>SHA-256</span>
+            <code>{SITE_BUILD.sha256}</code>
+          </p>
+          <dl className="release-details">
+            <div>
+              <dt>Версия</dt>
+              <dd>{newerOnGithub?.tag_name ?? SITE_BUILD.tag}</dd>
+            </div>
+            <div>
+              <dt>Дата выпуска</dt>
+              <dd>
+                <time dateTime={newerOnGithub?.published_at ?? SITE_BUILD.publishedAt}>
+                  {releaseDate(newerOnGithub?.published_at ?? SITE_BUILD.publishedAt)}
+                </time>
+              </dd>
+            </div>
+          </dl>
+          <div className="release-links">
+            <a href={releaseUrl} className="editorial-link">
+              <Github size={15} aria-hidden="true" /> Описание версии на GitHub{" "}
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
             <Link
               to="/docs/$"
               params={{ _splat: "latest/getting-started/installation" }}
@@ -153,49 +138,6 @@ function DownloadPage() {
               Руководство по установке <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
-          {asset && (
-            <p className="release-filename">
-              {asset.name} · {fileSize(asset.size)}
-            </p>
-          )}
-          <dl className="release-details">
-            <div>
-              <dt>Версия</dt>
-              <dd>
-                {latest?.tag_name ??
-                  (query.isPending
-                    ? "Проверяем…"
-                    : query.isError
-                      ? "Недоступно"
-                      : "Не опубликована")}
-              </dd>
-            </div>
-            <div>
-              <dt>Дата выпуска</dt>
-              <dd>
-                {latest?.published_at ? (
-                  <time dateTime={latest.published_at}>{releaseDate(latest.published_at)}</time>
-                ) : query.isPending ? (
-                  "Проверяем…"
-                ) : query.isError ? (
-                  "Недоступно"
-                ) : (
-                  "Не объявлена"
-                )}
-              </dd>
-            </div>
-          </dl>
-          {latest && (
-            <a href={latest.html_url} className="editorial-link release-notes">
-              Описание версии на GitHub <ExternalLink size={14} aria-hidden="true" />
-            </a>
-          )}
-          {query.isError && query.data && (
-            <p role="status" className="release-refresh-note">
-              Не удалось обновить данные с GitHub. Показана последняя загруженная информация о
-              версии.
-            </p>
-          )}
         </section>
 
         <aside aria-labelledby="requirements-heading" className="requirements-panel">
